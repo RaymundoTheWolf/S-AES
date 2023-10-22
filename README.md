@@ -29,7 +29,7 @@ Repository for cryptography homework, teamed up with Yuyang Hu @[Gracivio](https
       ```
 
 
-    - The half byte substituion divides the plain text into four 4-bits and turn into a *state matrix*. And for each part, we do a substituion.
+    - The nibblebyte substituion divides the plain text into four 4-bits and turn into a *state matrix*. And for each part, we do a substituion.
     - The row shift only swaps the second row
     - The column confusion goes a GF(2^4) with mod x^4+x+1 calculation.
 
