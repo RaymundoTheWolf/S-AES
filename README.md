@@ -9,23 +9,23 @@ Repository for cryptography homework, teamed up with Yuyang Hu @[Gracivio](https
 
       ```
       def function_g(w, round):
-      left = w[:4]
-      right = w[4:]
-      temp = left
-      left = right
-      right = temp
-      left_x = int(left[:2], 2)
-      left_y = int(left[2:], 2)
-      right_x = int(right[:2], 2)
-      right_y = int(right[2:], 2)
-      left = bin(S_Box[left_x][left_y])[2:].zfill(4)
-      right = bin(S_Box[right_x][right_y])[2:].zfill(4)
-      res = left + right
-      if round == 1:
-        res = XOR(res, RCON[0])
-      elif round == 2:
-        res = XOR(res, RCON[1])
-      return res
+          left = w[:4]
+          right = w[4:]
+          temp = left
+          left = right
+          right = temp
+          left_x = int(left[:2], 2)
+          left_y = int(left[2:], 2)
+          right_x = int(right[:2], 2)
+          right_y = int(right[2:], 2)
+          left = bin(S_Box[left_x][left_y])[2:].zfill(4)
+          right = bin(S_Box[right_x][right_y])[2:].zfill(4)
+          res = left + right
+          if round == 1:
+            res = XOR(res, RCON[0])
+          elif round == 2:
+            res = XOR(res, RCON[1])
+          return res
       ```
 
 
