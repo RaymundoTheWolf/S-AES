@@ -90,7 +90,7 @@ class Welcome(object):
     def createPage(self):
         self.page = Frame(self.root)  # 创建Frame
         self.page.pack(fill='both', pady=10, expand=True)
-        sWelcome = tk.Label(self.page, text='S-DES密码系统', height=3, width=200,
+        sWelcome = tk.Label(self.page, text='S-AES密码系统', height=3, width=200,
                             bg='white',
                             font=('黑体', 26))
         sWelcome.pack(pady=10)
