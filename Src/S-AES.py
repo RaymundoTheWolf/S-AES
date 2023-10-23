@@ -8,138 +8,45 @@ import ttkbootstrap as ttk
 from ttkbootstrap import Style
 from tkinter import *
 
-
-# 明文转成二进制
-def text2binary(text):
-    iBinary = ""
-    for char in text:
-        ascii_code = ord(char)
-        binary_code = bin(ascii_code)[2:]  # 去掉二进制字符串前面的"0b"前缀
-        if len(binary_code) > 8:
-            return 0
-        binary_code = binary_code.zfill(8)  # 在不足八位的二进制数前面填充零
-        iBinary += binary_code
-    return iBinary
+import utility as ut
 
 
-# 子密钥的生成
-def subkey(origin):
-    p_10 = [3, 5, 2, 7, 4, 10, 1, 9, 8, 6]
-    p_8 = [6, 3, 7, 4, 8, 5, 10, 9]
-    leftShift01 = [2, 3, 4, 5, 1]
-    leftShift02 = [3, 4, 5, 1, 2]
-    temp = []
-    # 按p10轮转对密钥进行处理
-    for i in range(10):
-        temp.append(int(origin[p_10[i] - 1]))
-    k1 = []
-    k2 = []
-    temp01 = []
-    temp02 = []
-    temp03 = []
-    temp04 = []
-    # 获得k1
-    # 对密钥的左半边进行leftShift1
-    for i in range(5):
-        temp01.append(temp[leftShift01[i] - 1])
-    # 对密钥的右半边进行leftShift1
-    for i in range(5):
-        temp02.append(temp[leftShift01[i] + 4])
-    # 合并得到子密钥k1
-    for i in range(8):
-        k1.append((temp01 + temp02)[p_8[i] - 1])
-    # 计算并获得k2
-    for i in range(5):
-        temp03.append(temp[leftShift02[i] - 1])
-    for i in range(5):
-        temp04.append(temp[leftShift02[i] + 4])
-    for i in range(8):
-        k2.append((temp03 + temp04)[p_8[i] - 1])
-    return [k1, k2]
+def encryption(plaintext, key):
+    k0, k1, k2 = ut.key_extend(key)
+    text = ut.XOR(plaintext, k0)
+    text = ut.nibblebyte_substitution(text, 0)
+    text = ut.row_shift(text)
+    text = ut.column_confuse(text, 0)
+    text = ut.key_XOR(text, k1)
+    temp = ""
+    for column in range(len(text[0])):
+        for row in range(len(text)):
+            temp += str(text[row][column])
+    text = ut.nibblebyte_substitution(temp, 0)
+    text = ut.row_shift(text)
+    text = ut.key_XOR(text, k2)
+    ciphertext = ''
+    for column in range(len(text[0])):
+        for row in range(len(text)):
+            ciphertext += str(text[row][column])
+    return ciphertext
 
 
-# 初始置换函数
-def permutation(origin):
-    p_box = [2, 6, 3, 1, 4, 8, 5, 7]
-    p_result = []
-    for index in range(8):
-        p_result.append(int(origin[p_box[index] - 1]))
-    return p_result
-
-
-# 最终置换函数
-def permutation_reverse(origin):
-    p_box = [4, 1, 3, 5, 7, 2, 8, 6]
-    p_reverse_result = []
-    for index in range(8):
-        p_reverse_result.append(int(origin[p_box[index] - 1]))
-    return p_reverse_result
-
-
-# 二进制转换
-def binary(a):
-    if a == 3:
-        return [1, 1]
-    elif a == 2:
-        return [1, 0]
-    elif a == 1:
-        return [0, 1]
-    else:
-        return [0, 0]
-
-
-# 轮函数，输入的值分别为处理后的明文和子密钥
-def round_function(Text, k):
-    right = []
-    left = []
-    for index in range(4):
-        left.append(int(Text[index]))
-    for index in range(4):
-        right.append(int(Text[index + 4]))
-    EPBox = [4, 1, 2, 3, 2, 3, 4, 1]
-    SBox01 = [(1, 0, 3, 2), (3, 2, 1, 0), (0, 2, 1, 3), (3, 1, 0, 2)]
-    SBox02 = [(0, 1, 2, 3), (2, 3, 1, 0), (3, 0, 1, 2), (2, 1, 0, 3)]
-    SPBox = [2, 4, 3, 1]
-    expend_right = []
-    # 对R半边进行拓展
-    for index in range(8):
-        expend_right.append(int(right[EPBox[index] - 1]))
-    # 进行异或
-    for index in range(8):
-        if int(k[index]) == expend_right[index]:
-            expend_right[index] = 0
-        else:
-            expend_right[index] = 1
-    # 找到在矩阵中对应位置
-    flag01 = expend_right[0] * 2 + expend_right[3] * 1
-    flag02 = expend_right[1] * 2 + expend_right[2] * 1
-    flag03 = expend_right[4] * 2 + expend_right[7] * 1
-    flag04 = expend_right[5] * 2 + expend_right[6] * 1
-    expend_right01 = SBox01[flag01][flag02]
-    expend_right02 = SBox02[flag03][flag04]
-    ans = binary(expend_right01) + binary(expend_right02)
-    key_left = []
-    # 轮转
-    for index in range(4):
-        key_left.append(ans[SPBox[index] - 1])
-    # 异或
-    for index in range(4):
-        if key_left[index] == left[index]:
-            key_left[index] = 0
-        else:
-            key_left[index] = 1
-    return key_left + right
-
-
-# 左右互换SW，输入一段8-bit的密文，函数会将其左右4-bit的内容调换
-def swapper(origin):
-    right = []
-    left = []
-    for index in range(4):
-        right.append(origin[index])
-    for index in range(4):
-        left.append(origin[index + 4])
-    return left + right
+def decryption(ciphertext, key):
+    k0, k1, k2 = ut.key_extend(key)
+    text = ut.XOR(ciphertext, k2)
+    text = [[text[0:4], text[8:12]], [text[4:8], text[12:16]]]
+    text = ut.row_shift(text)
+    text = text[0][0] + text[1][0] + text[0][1] + text[1][1]
+    text = ut.nibblebyte_substitution(text, 1)
+    text = ut.key_XOR(text, k1)
+    text = ut.column_confuse(text, 1)
+    text = ut.row_shift(text)
+    text = text[0][0] + text[1][0] + text[0][1] + text[1][1]
+    text = ut.nibblebyte_substitution(text, 1)
+    text = ut.key_XOR(text, k0)
+    plaintext = text[0][0] + text[1][0] + text[0][1] + text[1][1]
+    return plaintext
 
 
 # 获取密钥函数
@@ -148,6 +55,14 @@ def generate_key(length):
     # 转为二进制，左零补全为10-bit
     key_bin = bin(key).replace('0b', '').zfill(10)
     return key_bin
+
+
+def char_to_binary(char):
+    # 将字符转换为ASCII码
+    ascii_code = ord(char)
+    # 将ASCII码转换为8位二进制数
+    binary_string = str(bin(ascii_code))[2:].zfill(16)
+    return binary_string
 
 
 # 判断是否为2的次方
@@ -205,7 +120,7 @@ class Welcome(object):
             elif flag == 2:  # 获取密钥
                 self.page.destroy()
                 Welcome(self.root)
-                key = str(generate_key(10))
+                key = str(generate_key(16))
                 tk.messagebox.showinfo('Key Generated', '密钥请妥善保管:' + key)
             elif flag == 3:
                 self.page.destroy()
@@ -250,7 +165,7 @@ class Encryption(object):
             # 这里设置检查，防止用户不合理输入
             key = self.masterKey.get()
             flag = select_button()
-            if len(key) != 10:
+            if len(key) != 16:
                 tk.messagebox.showerror('Invalid Key', '密钥长度错误，请重新输入')
                 return -1
             for i in range(len(key)):
@@ -259,41 +174,29 @@ class Encryption(object):
                     return -1
             if flag == 0:
                 # ASCII版本
-                text = self.plainText.get()
                 plainText_output.delete(0.0, tk.END)
                 plainText_output.insert('insert', '加密结果：\n')
+                text = self.plainText.get()
+                plaintext = ''
                 for letter in text:
-                    binary_text = text2binary(letter)
-                    k1 = subkey(key)[0]
-                    k2 = subkey(key)[1]
-                    ip = permutation(binary_text)
-                    fk1 = round_function(ip, k1)
-                    sw = swapper(fk1)
-                    fk2 = round_function(sw, k2)
-                    ip_reverse = permutation_reverse(fk2)
-                    ip_str = ''.join(str(i) for i in ip_reverse)
-                    out = chr(int(ip_str, 2))
-                    plainText_output.insert('insert', out)
+                    letter = char_to_binary(letter)
+                    letter = encryption(letter, key)
+                    out = chr(int(letter, 2))
+                    plaintext += out
+                plainText_output.insert('insert', plaintext)
             else:
                 text = self.plainText.get()
-                if len(text) != 8:
+                if len(text) != 16:
                     tk.messagebox.showerror('Invalid PlainText', '明文错误，请重新输入')
                     return -1
                 for i in range(len(text)):
                     if int(text[i]) != 1 and int(text[i]) != 0:
                         tk.messagebox.showerror('Invalid Key', '明文错误，请重新输入')
                         return -1
-                k1 = subkey(key)[0]
-                k2 = subkey(key)[1]
-                ip = permutation(text)
-                fk1 = round_function(ip, k1)
-                sw = swapper(fk1)
-                fk2 = round_function(sw, k2)
-                ip_reverse = permutation_reverse(fk2)
-                ip_str = ''.join(str(i) for i in ip_reverse)
+                text = encryption(text, key)
                 plainText_output.delete(0.0, tk.END)
                 plainText_output.insert('insert', '加密结果：')
-                plainText_output.insert('insert', ip_str)
+                plainText_output.insert('insert', text)
 
         # GUI界面
         sWelcome = tk.Label(self.page, text='加密界面', height=3, width=200,
@@ -367,11 +270,11 @@ class Decryption(object):
             flag = select_button()
             key = self.masterKey.get()
             cipherText = self.cipherText.get()
-            if len(key) != 10:
+            if len(key) != 16:
                 tk.messagebox.showerror('Invalid Key', '密钥格式错误')
                 return -1
             if flag == 1:
-                if len(cipherText) != 8:
+                if len(cipherText) != 16:
                     tk.messagebox.showerror('Invalid CipherText', '密文格式错误')
                     return -1
                 for i in range(len(key)):
@@ -382,39 +285,20 @@ class Decryption(object):
                     if int(cipherText[i]) != 1 and int(cipherText[i]) != 0:
                         tk.messagebox.showerror('Invalid Key', '密钥错误，请重新输入')
                         return -1
-                k1 = subkey(key)[0]
-                k2 = subkey(key)[1]
-                ip = permutation(cipherText)
-                fk2 = round_function(ip, k2)
-                sw = swapper(fk2)
-                fk1 = round_function(sw, k1)
-                ip_reverse = permutation_reverse(fk1)
+                text = encryption(cipherText, key)
                 plainText_output.delete(0.0, tk.END)
                 plainText_output.insert('insert', '解密结果：')
-                plainText_output.insert('insert', ip_reverse)
+                plainText_output.insert('insert', text)
             else:
-                binary_cipherText = text2binary(cipherText)
-                if len(binary_cipherText) % 8 != 0:
-                    tk.messagebox.showerror('Invalid CipherText', '密文格式错误')
-                    return -1
-                for i in range(len(key)):
-                    if int(key[i]) != 1 and int(key[i]) != 0:
-                        tk.messagebox.showerror('Invalid Key', '密钥内容错误,请重新输入')
-                        return -1
-                temp_text = [binary_cipherText[i:i + 8] for i in range(0, len(binary_cipherText), 8)]
                 plainText_output.delete(0.0, tk.END)
-                plainText_output.insert('insert', '解密结果：\n')
-                for index in temp_text:
-                    k1 = subkey(key)[0]
-                    k2 = subkey(key)[1]
-                    ip = permutation(index)
-                    fk2 = round_function(ip, k2)
-                    sw = swapper(fk2)
-                    fk1 = round_function(sw, k1)
-                    ip_reverse = permutation_reverse(fk1)
-                    ip_str = ''.join(str(i) for i in ip_reverse)
-                    out = chr(int(ip_str, 2))
-                    plainText_output.insert('insert', out)
+                plainText_output.insert('insert', '加密结果：\n')
+                ciphertext = ''
+                for letter in cipherText:
+                    letter = char_to_binary(letter)
+                    letter = decryption(letter, key)
+                    out = chr(int(letter, 2))
+                    ciphertext += out
+                plainText_output.insert('insert', ciphertext)
 
         # GUI界面
         sWelcome = tk.Label(self.page, text='解密界面', height=3, width=200,
@@ -482,42 +366,15 @@ class Crack(object):
             if var.get() == 1:
                 return 1
 
-        '''
-        def group_string(s):
-            ans = []
-            # 获取字符串长度
-            length = len(s)
-            # 如果字符串长度不能被8整除，在字符串末尾补0
-            if length % 8 != 0:
-                s += '0' * (8 - length % 8)
-                # 每8个字符拆分为一组，记录到列表中
-            groups = [s[i:i + 8] for i in range(0, length, 8)]
-            return groups
-        '''
-
         def encryption_ans_check(text, key, selection):
             if selection == 1:
-                k1 = subkey(key)[0]
-                k2 = subkey(key)[1]
-                ip = permutation(text)
-                fk1 = round_function(ip, k1)
-                sw = swapper(fk1)
-                fk2 = round_function(sw, k2)
-                ip_reverse = permutation_reverse(fk2)
-                return ip_reverse
+                return encryption(text, key)
             else:
                 result = ''
                 for letter in text:
-                    binary_text = text2binary(letter)
-                    k1 = subkey(key)[0]
-                    k2 = subkey(key)[1]
-                    ip = permutation(binary_text)
-                    fk1 = round_function(ip, k1)
-                    sw = swapper(fk1)
-                    fk2 = round_function(sw, k2)
-                    ip_reverse = permutation_reverse(fk2)
-                    ip_str = ''.join(str(i) for i in ip_reverse)
-                    out = chr(int(ip_str, 2))
+                    letter = char_to_binary(letter)
+                    out = encryption(letter, key)
+                    out = chr(int(out, 2))
                     result += out
                 return result
 
@@ -528,10 +385,10 @@ class Crack(object):
             if not is_power_of_two(num):
                 return -1
 
-            scale = int(1024 / num)
+            scale = int((2 ** 16) / num)
             flag = 0
             for index in range(Tid * scale, (Tid + 1) * scale):
-                temp_key = str(bin(index)[2:].zfill(10))
+                temp_key = str(bin(index)[2:].zfill(16))
                 temp_ans = encryption_ans_check(iText, temp_key, selection)
                 solved_ans = ''.join(str(i) for i in temp_ans)
                 if solved_ans == iCipher:
@@ -542,14 +399,14 @@ class Crack(object):
                 print(f"Key not found in thread {Tid}\n")
                 return -1
 
-        # 创建16个线程进行密码破解
+        # 创建64个线程进行密码破解
         def crack_func():
             threads = []
             start = time.time()
-            for i in range(16):
+            for i in range(64):
                 thread_id = i
                 t = threading.Thread(target=worker,
-                                     args=(16, thread_id, self.plainText.get(), self.cipherText.get(), self.ans,
+                                     args=(64, thread_id, self.plainText.get(), self.cipherText.get(), self.ans,
                                            select_button()))
                 t.start()
                 threads.append(t)
