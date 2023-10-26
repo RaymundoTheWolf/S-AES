@@ -15,9 +15,13 @@ def encryption(plaintext, key):
     k0, k1, k2 = ut.key_extend(key)
     text = ut.XOR(plaintext, k0)
     text = ut.nibblebyte_substitution(text, 0)
+    print(text)
     text = ut.row_shift(text)
+    print(text)
     text = ut.column_confuse(text, 0)
+    print(text)
     text = ut.key_XOR(text, k1)
+    print(text)
     temp = ""
     for column in range(len(text[0])):
         for row in range(len(text)):
@@ -96,12 +100,12 @@ class Welcome(object):
         sWelcome.pack(pady=10)
 
         combobox = ttk.Combobox(self.page, bootstyle='info', textvariable=self.commandStr)  # 获取用户输入的信息
-        combobox['value'] = ('加密', '解密', '获取密钥', 'Crack')  # 组合框显示的选项
+        combobox['value'] = ('加密', '解密', '获取密钥', 'Crack', 'CBC')  # 组合框显示的选项
         combobox.current(0)
         combobox.pack(padx=5, pady=10)
         combobox.place(relx=0.45, rely=0.45)  # 组合框的位置和大小
 
-        getStr = ['加密', '解密', '获取密钥', 'Crack']
+        getStr = ['加密', '解密', '获取密钥', 'Crack', 'CBC']
 
         # 选择不同功能切换至不同界面
         def get_command():
@@ -125,6 +129,9 @@ class Welcome(object):
             elif flag == 3:
                 self.page.destroy()
                 Crack(self.root)
+            elif flag == 4:
+                self.page.destroy()
+                CBC(self.root)
             else:
                 tk.messagebox.showerror('错误', '不提供该类型服务')
 
@@ -432,9 +439,9 @@ class Crack(object):
         # 默认输入为二进制,用于判断哪个按钮被选中
         var = IntVar()
         var.set(1)
-        btn_ascii = ttk.Radiobutton(self.page, text='ASCII', variable=var, value=0)
+        btn_ascii = ttk.Radiobutton(self.page, text='破解', variable=var, value=0)
         btn_ascii.place(relx=0.32, rely=0.2)
-        btn_bin = ttk.Radiobutton(self.page, text='Binary', variable=var, value=1)
+        btn_bin = ttk.Radiobutton(self.page, text='加密', variable=var, value=1)
         btn_bin.place(relx=0.5, rely=0.2)
 
         # 标签显示输入类别
@@ -460,6 +467,137 @@ class Crack(object):
 
         # "破解"按钮
         crack_button = ttk.Button(self.page, text='破解', bootstyle='success.TButton', command=crack_func, width=7)
+        crack_button.place(relx=0.52, rely=0.83)
+
+
+class CBC(object):
+    def __init__(self, master=None):
+        self.page = None
+        self.root = master  # 定义内部变量root
+        self.root.geometry('820x660+900+450')  # 设置窗口大小
+        self.plainText = ttk.StringVar()
+        self.cipherText = ttk.StringVar()
+        self.IVText = ttk.StringVar()
+        self.button_str = StringVar()
+        self.operation_str = StringVar()
+        self.createPage()
+        self.ans = []
+
+    def iBack(self):
+        self.page.destroy()
+        Welcome(self.root)
+
+    def createPage(self):
+        self.page = Frame(self.root)  # 创建Frame
+        self.page.pack(fill='both', ipadx=10, ipady=10, expand=True)
+        self.button_str.set("明文")
+        self.operation_str.set("加密")
+
+        def select_button():
+            if var.get() == 0:
+                self.button_str.set("密文")
+                self.operation_str.set("解密")
+                return 0
+            if var.get() == 1:
+                self.button_str.set("明文")
+                return 1
+
+        def CBC_encryption(plaintext, IV, key):
+            num_elements = (len(plaintext) + 15) // 16
+            # 将字符串拆分成长度为16的元素，并在不足16位的元素左侧补全0
+            char_arrays = []
+            for i in range(num_elements):
+                start = i * 16
+                end = start + 16
+                element = plaintext[start:end].ljust(16, '0')
+                char_arrays.append(element)
+            plaintext = char_arrays
+            for i in range(len(plaintext)):
+                initial_vector = IV
+                plaintext[i] = ut.XOR(plaintext[i], initial_vector)
+                IV, plaintext[i] = encryption(plaintext[i], key), encryption(plaintext[i], key)
+            ciphertext = ''
+            for i in range(len(plaintext)):
+                ciphertext += plaintext[i]
+            return ciphertext
+
+        def CBC_decryption(ciphertext, initial_vector, key):
+            num_elements = (len(ciphertext) + 15) // 16
+            # 将字符串拆分成长度为16的元素，并在不足16位的元素左侧补全0
+            char_arrays = []
+            for i in range(num_elements):
+                start = i * 16
+                end = start + 16
+                element = ciphertext[start:end].ljust(16, '0')
+                char_arrays.append(element)
+            ciphertext = char_arrays
+            for i in range(len(ciphertext)):
+                temp = ciphertext[i]
+                ciphertext[i] = decryption(ciphertext[i], key)
+                ciphertext[i] = ut.XOR(ciphertext[i], initial_vector)
+                initial_vector = temp
+            plaintext = ''
+            for i in range(len(ciphertext)):
+                plaintext += ciphertext[i]
+            return plaintext
+
+        def CBC_operation():
+            flag = select_button()
+            input_element = self.plainText.get()
+            key = self.cipherText.get()
+            initial_vector = self.IVText.get()
+            res = ''
+            if flag == 0:
+                res = CBC_decryption(input_element, initial_vector, key)
+            else:
+                res = CBC_encryption(input_element, initial_vector, key)
+            key_output.delete(0.0, tk.END)
+            key_output.insert('insert', '结果：')
+            key_output.insert('insert', res)
+
+        # GUI界面
+        sWelcome = tk.Label(self.page, text='Cipher Block Chaining', height=3, width=200,
+                            bg='white',
+                            font=('黑体', 20))
+        sWelcome.pack()
+
+        # 默认输入为二进制,用于判断哪个按钮被选中
+        var = IntVar()
+        var.set(1)
+        btn_ascii = ttk.Radiobutton(self.page, text='破解', variable=var, value=0, command=select_button)
+        btn_ascii.place(relx=0.32, rely=0.2)
+        btn_bin = ttk.Radiobutton(self.page, text='加密', variable=var, value=1, command=select_button)
+        btn_bin.place(relx=0.5, rely=0.2)
+
+        # 标签显示输入类别
+        ciphertext_label = tk.Label(self.page, textvariable=self.button_str, width=9, height=3, font=('黑体', 13),
+                                    bg='white')
+        ciphertext_label.place(relx=0.28, rely=0.24)
+        plaintext_label = tk.Label(self.page, text='密钥', width=9, height=3, font=('黑体', 13), bg='white')
+        plaintext_label.place(relx=0.28, rely=0.32)
+        IV_label = tk.Label(self.page, text='初始向量', width=9, height=3, font=('黑体', 13), bg='white')
+        IV_label.place(relx=0.28, rely=0.39)
+
+        # 明文，密文输入栏
+        plainText_input = ttk.Entry(self.page, textvariable=self.plainText)
+        plainText_input.place(relx=0.43, rely=0.26)
+        cipherText_input = ttk.Entry(self.page, textvariable=self.cipherText)
+        cipherText_input.place(relx=0.43, rely=0.34)
+        cipherText_input = ttk.Entry(self.page, textvariable=self.IVText)
+        cipherText_input.place(relx=0.43, rely=0.41)
+
+        # 输出可能的密钥
+        key_output = ttk.Text(self.page, height=9, width=30)
+        key_output.place(relx=0.32, rely=0.50)
+        key_output.insert('insert', '结果：')
+
+        # 返回按钮
+        quit_button = ttk.Button(self.page, text='返回', bootstyle='primary.TButton', command=self.iBack, width=7)
+        quit_button.place(relx=0.35, rely=0.83)
+
+        # "确定"按钮
+        crack_button = ttk.Button(self.page, textvariable=self.operation_str, bootstyle='success.TButton',
+                                  command=CBC_operation, width=7)
         crack_button.place(relx=0.52, rely=0.83)
 
 
