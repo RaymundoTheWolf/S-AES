@@ -51,4 +51,9 @@ Repository for cryptography homework, teamed up with Yuyang Hu @[Gracivio](https
 3. CBC Mode
     - Also known as Cipher Block Chaining, which be able to encrypt long bits plaintext.
   
-# TBC
+# GUI
+- We use tkinter to create the user interface. Relative layout is used for better demonstration, but some particular devices still see wrong layout.
+
+# How to use
+- Download S-AES.py and utility.py, and you need to download some packages to meet the environment it runs on.
+
