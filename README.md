@@ -33,7 +33,7 @@ Repository for cryptography homework, teamed up with Yuyang Hu @[Gracivio](https
     - The row shift only swaps the second row
     - The column confusion goes a GF(2^4) with mod x^4+x+1 calculation.
 
-1. **Decryption**
+2. **Decryption**
     - According to S-AES tutorial, the decryption procedure is alike encryption but reversed. Following **first XOR(use Key-2), reversed shift rows, reversed nibblebyte substitution, second XOR(use Key-1), reversed column confusion, reversed shift rows, reversed nibblebyte substitution, third XOR(use Key-0)**. For half byte substituion, row shifts and column confusion, a reversed S-Box and matrix is used, which under the calculation of math.
 
 
@@ -42,4 +42,13 @@ Repository for cryptography homework, teamed up with Yuyang Hu @[Gracivio](https
     S_Box_Verse = [(10, 5, 9, 11), (1, 7, 8, 15), (6, 0, 2, 3), (12, 4, 13, 14)]
     ```
 
+# Feature
+1. 2-AES
+    - 2-AES has 16-bit plain text or cipher text input, and 32-bit key. In 2-AES, we use two S-AES to encrypt the plaintext via two keys, and each key is seperated of 16-bit from the 32-bit key.
+    - Also, we add a crack feature in 2-AES, given plain text and corresponding cipher text, we use a key to encrypt the plaintext and use the other to decrypt the cipher text, and compare the middle text to perform the attack.
+2. 3-AES
+    - Like 2-AES, we use three S-AES to encrypt the plaintext, the process is *encrypt,encrypt,encrypt*.
+3. CBC Mode
+    - Also known as Cipher Block Chaining, which be able to encrypt long bits plaintext.
+  
 # TBC
