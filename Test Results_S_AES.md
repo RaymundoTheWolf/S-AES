@@ -8,13 +8,13 @@
 
 - 密钥使用：***0010111101101011***
 
- ![encryption_binary](C:\Users\rickt\Desktop\References\encryption_binary.png)
+ ![encryption_binary](https://github.com/RaymundoTheWolf/S-AES/blob/main/References/encryption_binary.png)
 
 ### 1.2 解密
 
 - 使用相同密钥：***0010111101101011***
 
- ![decryption_binary](C:\Users\rickt\Desktop\References\decryption_binary.png)
+ ![decryption_binary](https://github.com/RaymundoTheWolf/S-AES/blob/main/References/decryption_binary.png)
 
 
 
@@ -28,7 +28,7 @@
 - 明文：1010101010101010
 - 密钥：0101010101010101
 
- ![cross_test_A](C:\Users\rickt\Desktop\References\cross_test_A.png)
+ ![cross_test_A](https://github.com/RaymundoTheWolf/S-AES/blob/main/References/cross_test_A.png)
 
 
 
@@ -37,7 +37,7 @@
 - 明文：1010101010101010
 - 密钥：0101010101010101
 
- ![cross_test_B](C:\Users\rickt\Desktop\References\cross_test_B.png)
+ ![cross_test_B](https://github.com/RaymundoTheWolf/S-AES/blob/main/References/cross_test_B.png)
 
 ## 第三关：扩展功能
 
@@ -45,11 +45,11 @@
 
 ### 3.1 加密（ASCII风格）
 
- ![encryption_ascii](C:\Users\rickt\Desktop\References\encryption_ascii.png)
+ ![encryption_ascii](https://github.com/RaymundoTheWolf/S-AES/blob/main/References/encryption_ascii.png)
 
 ### 3.2 解密（ASCII风格）
 
- ![decryption_ascii](C:\Users\rickt\Desktop\References\decryption_ascii.png)
+ ![decryption_ascii](https://github.com/RaymundoTheWolf/S-AES/blob/main/References/decryption_ascii.png)
 
 
 
@@ -62,19 +62,19 @@
 
 #### 4.1.1 加密
 
- ![double_encrypt](C:\Users\rickt\Desktop\References\double_encrypt.png)
+ ![double_encrypt](https://github.com/RaymundoTheWolf/S-AES/blob/main/References/double_encrypt.png)
 
 
 
 #### 4.1.2解密
 
- ![double_encryption_decrypt](C:\Users\rickt\Desktop\References\double_encryption_decrypt.png)
+ ![double_encryption_decrypt](https://github.com/RaymundoTheWolf/S-AES/blob/main/References/double_encryption_decrypt.png)
 
 ### 4.2 中间相遇攻击
 
 - 假设你找到了使用相同密钥的明、密文对(一个或多个)，请尝试使用中间相遇攻击的方法找到正确的密钥***Key(K1+K2)***
 
- ![crack](C:\Users\rickt\Desktop\References\crack.gif)
+ ![crack](https://github.com/RaymundoTheWolf/S-AES/blob/main/References/crack.gif)
 
 
 
@@ -85,13 +85,13 @@
 
 #### 4.3.1 加密
 
- ![triple_encryption](C:\Users\rickt\Desktop\References\triple_encryption.png)
+ ![triple_encryption](https://github.com/RaymundoTheWolf/S-AES/blob/main/References/triple_encryption.png)
 
 
 
 #### 4.3.2 解密
 
- ![triple_encryption_decrypt](C:\Users\rickt\Desktop\References\triple_encryption_decrypt.png)
+ ![triple_encryption_decrypt](https://github.com/RaymundoTheWolf/S-AES/blob/main/References/triple_encryption_decrypt.png)
 
 
 
@@ -101,13 +101,13 @@
 
 ### 5.1 CBC工作模式加密
 
- ![CBC_encryption](C:\Users\rickt\Desktop\References\CBC_encryption.png)
+ ![CBC_encryption](https://github.com/RaymundoTheWolf/S-AES/blob/main/References/CBC_encryption.png)
 
 
 
 ### 5.2 CBC工作模式解密
 
- ![CBC_decryption](C:\Users\rickt\Desktop\References\CBC_decryption.png)
+ ![CBC_decryption](https://github.com/RaymundoTheWolf/S-AES/blob/main/References/CBC_decryption.png)
 
 
 
@@ -117,7 +117,7 @@
 
 - 将***101011100111==000111==00001000001010***修改为***101011100111==010100==00001000001010***
 
- ![CBC_test](C:\Users\rickt\Desktop\References\CBC_test.png)
+ ![CBC_test](https://github.com/RaymundoTheWolf/S-AES/blob/main/References/CBC_test.png)
 
 ## 总结
 
