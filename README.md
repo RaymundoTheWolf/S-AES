@@ -34,7 +34,7 @@ Repository for cryptography homework, teamed up with Yuyang Hu @[Gracivio](https
     - The column confusion goes a GF(2^4) with mod x^4+x+1 calculation.
 
 2. **Decryption**
-    - According to S-AES tutorial, the decryption procedure is alike encryption but reversed. Following **first XOR(use Key-2), reversed shift rows, reversed nibblebyte substitution, second XOR(use Key-1), reversed column confusion, reversed shift rows, reversed nibblebyte substitution, third XOR(use Key-0)**. For half byte substituion, row shifts and column confusion, a reversed S-Box and matrix is used, which under the calculation of math.
+    - According to S-AES tutorial, the decryption procedure is alike encryption but reversed. Following **first XOR(use Key-2), reversed shift rows, reversed nibblebyte substitution, second XOR(use Key-1), reversed column confusion, reversed shift rows, reversed nibblebyte substitution, third XOR(use Key-0)**. For nibblebyte substituion, row shifts and column confusion, a reversed S-Box and matrix is used, which under the calculation of math.
 
 
     ```
@@ -55,7 +55,7 @@ Repository for cryptography homework, teamed up with Yuyang Hu @[Gracivio](https
 - We use tkinter to create the user interface. Relative layout is used for better demonstration, but some particular devices still see wrong layout.
 
 # How to use
-- Download S-AES.py and utility.py, and you need to download some packages to meet the environment it runs on.
+- Download ***S-AES.py*** and ***utility.py***, and you need to download some packages to meet the environment it runs on.
 
 # Results
-- Go to **Test results.md** in this repository for further information :)
+- Go to ***Test results.md*** in this repository for further information :)
