@@ -57,3 +57,5 @@ Repository for cryptography homework, teamed up with Yuyang Hu @[Gracivio](https
 # How to use
 - Download S-AES.py and utility.py, and you need to download some packages to meet the environment it runs on.
 
+# Results
+- Go to **Test results.md** in this repository for further information :)
